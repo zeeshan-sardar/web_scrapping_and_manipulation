@@ -13,29 +13,10 @@ options.headless = False
 driver = webdriver.Chrome("/usr/bin/chromedriver", options=options)
 driver.get("https://www.daft.ie/property-for-rent/ireland?location=dublin-2-dublin&location=dublin-4-dublin&location=dublin-6-dublin&location=dublin-6w-dublin&location=dublin-14-dublin")
 
-username ="m.zeeshan1923@gmail.com"
-password = "Zeeshan@123"
-message = """Hi,
-
-My name is Zeeshan and I am writing to you in regards to your ad for the accommodation. My wife and I are a young couple working as Researchers at UCD and we are very interested in your property.
-
-A little about us:
-- We are non-smokers and non-drinkers.
-- We have no children and no pets.
-- We do not own a car.
-- We can provide Irish references.
-
-We are looking to move in from the mid of June and we are willing to sign a long-term lease if that is what you prefer.
-
-We are both very clean and tidy people and we would take great care of your property. 
-
-We would love to arrange a viewing at your earliest convenience. Please feel free to contact me on my mobile number (+353870572566) or my WhatsApp number (+923216991923) if you have any questions or would like to arrange a viewing.
-
-We look forward to hearing from you soon.
-
-Yours sincerely,
-
-Zeeshan"""
+name = "personal name"
+username ="Emaile"
+password = "password"
+message = """ Message """
 
 time.sleep(1)
 # Accept cookies
@@ -147,10 +128,10 @@ while True:
                 time.sleep(3)
                 driver.switch_to.window(driver.window_handles[-1])
             
-                driver.find_element(By.ID, "keyword1").send_keys("dfds")
-                driver.find_element(By.ID, "keyword2").send_keys("dfsdfds@gmail.com")
-                driver.find_element(By.ID, "keyword3").send_keys("")
-                driver.find_element(By.ID, "message").send_keys('message') 
+                driver.find_element(By.ID, "keyword1").send_keys(name)
+                driver.find_element(By.ID, "keyword2").send_keys(username)
+                driver.find_element(By.ID, "keyword3").send_keys(password)
+                driver.find_element(By.ID, "message").send_keys(message) 
                 driver.find_element(By.XPATH, '//button[@aria-label="Send"]').click()
                 
                 time.sleep(3)
