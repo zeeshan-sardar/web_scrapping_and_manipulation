@@ -1,18 +1,27 @@
+
+import os
+import re
+import csv
+import time
 from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
+from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-import time
-from selenium.webdriver.common.keys import Keys
+
+# Create file object and write header to store property information
+file = open('properties.csv', mode='a', newline='')
+writer = csv.writer(file)
+if os.stat('properties.csv').st_size == 0:
+    print('The file is empty, writing header.')
+    writer.writerow(['Address', 'Price', 'Beds', 'Baths', 'Type', 'Date', 'Views'])
+
 
 options = Options()
-
 options.headless = False
 
 driver = webdriver.Chrome("/usr/bin/chromedriver", options=options)
-driver.get("https://www.daft.ie/property-for-rent/ireland?location=dublin-2-dublin&location=dublin-4-dublin&location=dublin-6-dublin&location=dublin-6w-dublin&location=dublin-14-dublin")
-
+driver.get("https://www.daft.ie/property-for-rent/ireland?location=dublin-2-dublin&location=dublin-4-dublin&location=dublin-6-dublin&location=dublin-6w-dublin&location=dublin-14-dublin&rentalPrice_to=2500&sort=publishDateDesc")
 name = "personal name"
 username =""
 password = ""
@@ -126,14 +135,22 @@ while True:
                 except:
                     views = ""
 
+                if int(''.join(re.findall(r'\d+', price))) > 1900 and int(re.findall(r'\d+', beds)[0]) < 2:
+                    print("Skipping property due to High price.")
+                    # Close the current tab and switch back to the original tab
+                    driver.close()
+                    driver.switch_to.window(driver.window_handles[0])
+                    continue
 
-            
-                
-                
                 property_identifier = f"{add} {price} {beds} {baths} {property_type} {date} {views}"
                 if property_identifier in sent_emails:
                     print(f"Property '{property_identifier}' has already been processed. Skipping...")
+                    # Close the current tab and switch back to the original tab
+                    driver.close()
+                    driver.switch_to.window(driver.window_handles[0])
                     continue
+                
+
                 sent_emails.add(property_identifier)
                 print(f"Count: {i+1}, Perperty: {property_identifier}")
 
@@ -141,28 +158,38 @@ while True:
                 driver.find_element(By.XPATH, '//button[@aria-label="Email"]').click()
                 time.sleep(3)
                 driver.switch_to.window(driver.window_handles[-1])
+
+                try:
+                    driver.find_element(By.XPATH, '//span[@class="IconWithContentAndLabel__StyledIconWithContent-sc-1pv1vxd-2 czNtBM"]')
+                    print("Already Applied, skipping...")
+                    # Close the current tab and switch back to the original tab
+                    driver.close()
+                    driver.switch_to.window(driver.window_handles[0])
+                    continue
+                except:
+                    print("Did not apply before")
             
                 # Fill up the form to send to the advertiser
                 driver.find_element(By.ID, "keyword1").send_keys(name) # Name
                 driver.find_element(By.ID, "keyword2").send_keys(username) # Email
                 driver.find_element(By.ID, "keyword3").send_keys("") # Phone Number
                 driver.find_element(By.ID, "message").send_keys(message) # Message
-                driver.find_element(By.XPATH, '//button[@aria-label="Send"]').click()
                 
-                time.sleep(3)
                 try:
-                    driver.find_element('//div[@class="Alert__Message-sc-3b1i0x-1 gaOCVC"]')
-                    print("Email sent successfully to :", property_identifier)
+                    driver.find_element(By.XPATH, '//button[@aria-label="Send"]').click()
+                    print("Email sent successfully to.")
+                    time.sleep(3)
                 except:
                     print("Error while sending Email to :", property_identifier)
 
+                # writer.writerow([add, price, beds, baths, property_type, date, views])
                 # Close the current tab and switch back to the original tab
                 driver.close()
                 driver.switch_to.window(driver.window_handles[0])
             else:
                 print("Element is not enabled and cannot be clicked.")
 
-    time.sleep(60)
+    time.sleep(10)
 
     driver.refresh()
     time.sleep(5)
