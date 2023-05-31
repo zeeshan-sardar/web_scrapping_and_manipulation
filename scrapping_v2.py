@@ -14,8 +14,8 @@ driver = webdriver.Chrome("/usr/bin/chromedriver", options=options)
 driver.get("https://www.daft.ie/property-for-rent/ireland?location=dublin-2-dublin&location=dublin-4-dublin&location=dublin-6-dublin&location=dublin-6w-dublin&location=dublin-14-dublin")
 
 name = "personal name"
-username ="Emaile"
-password = "password"
+username =""
+password = ""
 message = """ Message """
 
 time.sleep(1)
@@ -95,6 +95,8 @@ while True:
                 
                 # Find property information
                 property_info = driver.find_element(By.XPATH, '//div[@data-testid="title-block"]')
+                # Find property stats
+                property_stats = driver.find_element(By.XPATH, '//div[@class="Statistics__MainContainer-sc-15tgae4-4 gNBtdx"]')
                 try:
                     add = property_info.find_element(By.XPATH, '//h1[@data-testid="address"]').text
                 except:
@@ -115,23 +117,36 @@ while True:
                     property_type = "- " + property_info.find_element(By.XPATH, './div[2]/p[3]').text
                 except:
                     property_type = ""
+                try:
+                    date = "- " + property_stats.find_element(By.XPATH, './div[1]/div/p').text
+                except:
+                    date = ""
+                try:
+                    views = "- " + property_stats.find_element(By.XPATH, './div[2]/div/p').text
+                except:
+                    views = ""
+
+
+            
                 
                 
-                property_identifier = f"{add} {price} {beds} {baths} {property_type}"
+                property_identifier = f"{add} {price} {beds} {baths} {property_type} {date} {views}"
                 if property_identifier in sent_emails:
                     print(f"Property '{property_identifier}' has already been processed. Skipping...")
                     continue
                 sent_emails.add(property_identifier)
                 print(f"Count: {i+1}, Perperty: {property_identifier}")
 
+                # Click on email button and switch to the form window
                 driver.find_element(By.XPATH, '//button[@aria-label="Email"]').click()
                 time.sleep(3)
                 driver.switch_to.window(driver.window_handles[-1])
             
-                driver.find_element(By.ID, "keyword1").send_keys(name)
-                driver.find_element(By.ID, "keyword2").send_keys(username)
-                driver.find_element(By.ID, "keyword3").send_keys(password)
-                driver.find_element(By.ID, "message").send_keys(message) 
+                # Fill up the form to send to the advertiser
+                driver.find_element(By.ID, "keyword1").send_keys(name) # Name
+                driver.find_element(By.ID, "keyword2").send_keys(username) # Email
+                driver.find_element(By.ID, "keyword3").send_keys("") # Phone Number
+                driver.find_element(By.ID, "message").send_keys(message) # Message
                 driver.find_element(By.XPATH, '//button[@aria-label="Send"]').click()
                 
                 time.sleep(3)
